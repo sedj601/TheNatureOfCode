@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.control.Button;
@@ -28,10 +29,10 @@ import javafx.util.Pair;
  */
 public class RandomWalks
 {
-    private List<Circle> circles = new ArrayList();
     private final double subsceneWidth = 780;
     private final double subsceneHeight = 600;
     private final double circleRaidus = 5;
+    private final int step = 5;
     private Timeline timeline;
     Pane mainRoot = new Pane();
     
@@ -59,13 +60,24 @@ public class RandomWalks
         
         
         Button btnRandowWalks1 = new Button("Randome Walk 1");
+        Button btnRandowWalks2 = new Button("Randome Walk 2"); 
+        
         btnRandowWalks1.setOnAction((actionEvent) ->
         {
+            if(mainRoot.getChildren().size() > 1)
+            {
+                mainRoot.getChildren().clear();
+                Circle originalCircle = new Circle(subsceneWidth / 2 + circleRaidus, subsceneHeight / 2 + circleRaidus, circleRaidus, Color.BLUE);
+                mainRoot.getChildren().add(originalCircle);
+            }
+            
             List<Boolean> walks = getWalks();
             AtomicInteger counter = new AtomicInteger(0);
             timeline = new Timeline(new KeyFrame(Duration.seconds(.2), (event) ->
             {
+                System.out.println("running 0");
                 Circle oldCircle = (Circle)mainRoot.getChildren().get(counter.get());
+                oldCircle.setFill(Color.BLACK);
                 Circle newCircle = new Circle(oldCircle.getCenterX(), oldCircle.getCenterY(), circleRaidus, Color.BLUE);
                 
                 if(counter.get() < walks.size())
@@ -73,35 +85,55 @@ public class RandomWalks
                     if(walks.get(counter.getAndIncrement()))
                     {
                         
-                        newCircle.setCenterX(newCircle.getCenterX() + 1);
+                        newCircle.setCenterX(newCircle.getCenterX() + step);
                     }
                     else
                     {
-                        newCircle.setCenterX(newCircle.getCenterX() - 1);
+                        newCircle.setCenterX(newCircle.getCenterX() - step);
                     }
                     
                     mainRoot.getChildren().add(newCircle);
                 }
                 else 
                 {
+                    System.out.println("stopped 0");
                     timeline.stop();
                 }
             }));
             
             timeline.setCycleCount(Timeline.INDEFINITE);
-            timeline.play();        
+            timeline.statusProperty().addListener((ov, t, t1) ->
+            {
+                if(t1.equals(Animation.Status.STOPPED))
+                {
+                    btnRandowWalks1.setDisable(false);
+                    btnRandowWalks2.setDisable(false);
+                }
+            });
+            timeline.play();     
+            btnRandowWalks1.setDisable(true);
+            btnRandowWalks2.setDisable(true);
         });
         
-        Button btnRandowWalks2 = new Button("Randome Walk 2"); 
+        
         btnRandowWalks2.setOnAction((actionEvent) ->
         {
+            if(mainRoot.getChildren().size() > 1)
+            {
+                mainRoot.getChildren().clear();
+                Circle originalCircle = new Circle(subsceneWidth / 2 + circleRaidus, subsceneHeight / 2 + circleRaidus, circleRaidus, Color.BLUE);
+                mainRoot.getChildren().add(originalCircle);
+            }
+            
             List<Pair<Boolean, Boolean>> walks = getWalks2();
             AtomicInteger counter = new AtomicInteger(0);
             
             
             timeline = new Timeline(new KeyFrame(Duration.seconds(.2), (event) ->
             {
+                System.out.println("running");
                 Circle oldCircle = (Circle)mainRoot.getChildren().get(counter.get());
+                oldCircle.setFill(Color.BLACK);
                 Circle newCircle = new Circle(oldCircle.getCenterX(), oldCircle.getCenterY(), circleRaidus, Color.BLUE);
             
                 if(counter.get() < walks.size())
@@ -111,30 +143,42 @@ public class RandomWalks
                     
                     if(b1 == true && b2 == true)
                     {
-                        newCircle.setCenterX(newCircle.getCenterX() + 1);
+                        newCircle.setCenterX(newCircle.getCenterX() + step);
                     }
                     else if(b1 == true && b2 == false)
                     {
-                        newCircle.setCenterY(newCircle.getCenterY() + 1);
+                        newCircle.setCenterY(newCircle.getCenterY() + step);
                     }
                     else if(b1 == false && b2 == true)
                     {
-                        newCircle.setCenterY(newCircle.getCenterY() - 1);
+                        newCircle.setCenterY(newCircle.getCenterY() - step);
                     }
                     else if(b1 == false && b2 == false)
                     {
-                        newCircle.setCenterX(newCircle.getCenterX() - 1);
+                        newCircle.setCenterX(newCircle.getCenterX() - step);
                     }
                     
                     mainRoot.getChildren().add(newCircle);
                 }
                 else 
                 {
+                    System.out.println("stopped");
                     timeline.stop();
                 }
             }));
             
             timeline.setCycleCount(Timeline.INDEFINITE);
+            timeline.statusProperty().addListener((ov, t, t1) ->
+            {
+                if(t1.equals(Animation.Status.STOPPED))
+                {
+                    btnRandowWalks1.setDisable(false);
+                    btnRandowWalks2.setDisable(false);
+                }
+            });
+            timeline.play();     
+            btnRandowWalks1.setDisable(true);
+            btnRandowWalks2.setDisable(true);
             timeline.play();
         });
         
@@ -145,8 +189,7 @@ public class RandomWalks
         
         root.setStyle("-fx-background-color: yellow");
         return root;
-    }
-    
+    }    
     
     List<Boolean> getWalks()
     {
